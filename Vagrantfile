@@ -47,7 +47,6 @@ Vagrant.configure("2") do |config|
     master.vm.hostname="master.example.com"
     master.vm.box = "origin-master.box"
 
-    master.vm.provision :shell, :path => "setup.sh", :args => "master"
     master.vm.network :private_network,
       :ip => "192.168.156.5",
       :libvirt__netmask => "255.255.255.0",
