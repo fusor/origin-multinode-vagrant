@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
   config.hostmanager.include_offline = true
   config.ssh.insert_key = false
 
-  config.vm.synced_folder ".", "/vagrant", type: "nfs"
+  config.vm.synced_folder ".", "/vagrant", :disabled => true
 
   config.vm.define "node1" do |node1|
     node1.vm.hostname="node1.example.com"
@@ -20,7 +20,6 @@ Vagrant.configure("2") do |config|
       :libvirt__netmask => "255.255.255.0",
       :libvirt__network_name => "centos_cluster_net",
       :libvirt__dhcp_enabled => false
-    node1.vm.synced_folder ".", "/vagrant", type: "nfs"
     node1.vm.provider :libvirt do |libvirt|
       libvirt.driver = "kvm"
       libvirt.memory = 4096
@@ -38,7 +37,6 @@ Vagrant.configure("2") do |config|
       :libvirt__netmask => "255.255.255.0",
       :libvirt__network_name => "centos_cluster_net",
       :libvirt__dhcp_enabled => false
-    node2.vm.synced_folder ".", "/vagrant", type: "nfs"
     node2.vm.provider :libvirt do |libvirt|
       libvirt.driver = "kvm"
       libvirt.memory = 4096
@@ -56,7 +54,6 @@ Vagrant.configure("2") do |config|
       :libvirt__netmask => "255.255.255.0",
       :libvirt__network_name => "centos_cluster_net",
       :libvirt__dhcp_enabled => false
-    master.vm.synced_folder ".", "/vagrant", type: "nfs"
     master.vm.provider :libvirt do |libvirt|
       libvirt.driver = "kvm"
       libvirt.memory = 8192
