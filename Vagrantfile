@@ -60,4 +60,11 @@ Vagrant.configure("2") do |config|
       libvirt.cpus = 4
     end
   end
+
+  config.trigger.after :up do
+    info "Cluster successfuly provisioned."
+    info "Your cluster lives at: 192.168.156.5:8443"
+    info "Default credentials are:"
+    info "admin/admin"
+  end
 end
