@@ -16,3 +16,8 @@ IP: 192.168.156.5
 User: admin
 pass: admin
 ```
+# Deploying an Ansible Service Broker inside the cluster
+Note: This requires docker installed on the host that this script is run.
+```
+./deploy_broker.sh <dockerhub_user> <dockerhub_password>
+```
