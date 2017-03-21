@@ -7,3 +7,10 @@ The origin cluster by default has a user 'admin' with password 'admin' which has
 # To run:
 vagrant up
 
+# Cluster information:
+```
+hostname: master.example.com
+IP: 192.168.156.5
+User: admin
+pass: admin
+```
