@@ -10,7 +10,7 @@ service NetworkManager stop
 grep -q -F 'dns=dnsmasq' /etc/NetworkManager/NetworkManager.conf || sed -i '/\[main\]/a dns=dnsmasq' /etc/NetworkManager/NetworkManager.conf
 mkdir -p /etc/NetworkManager/dnsmasq.d
 touch /etc/NetworkManager/dnsmasq.d/local-development.conf
-grep -q -F 'address=/cloudapps' /etc/NetworkManager/dnsmasq.d/local-development.conf || \
+grep -q -F 'address=/apps' /etc/NetworkManager/dnsmasq.d/local-development.conf || \
     echo "address=/apps.example.com/192.168.156.5" >> /etc/NetworkManager/dnsmasq.d/local-development.conf
 
 service NetworkManager start
