@@ -23,7 +23,7 @@ Note: This requires docker installed on the host that this script is run.
 ```
 
 # Common issues:
-If iptables is running or some firewall, the default IP address used in the deploy_broker script may not be accessible from within the docker network on your host. To fix this you can run the following command on your host:
+If iptables is running or some firewall, the default IP address used in the `deploy_broker.sh` script may not be accessible from within the docker network on your host. To fix this you can run the following command on your host:
 ``` 
 sudo iptables -I FORWARD -d 192.168.156.0/24 -j ACCEPT
 ```
