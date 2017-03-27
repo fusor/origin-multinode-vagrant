@@ -1,0 +1,13 @@
+---
+install_pkgs: 
+- wget 
+- screen 
+- tmux 
+- git 
+- vim 
+- glusterfs-client 
+- heketi-client 
+- iptables 
+- iptables-utils 
+- iptables-services 
+- docker
