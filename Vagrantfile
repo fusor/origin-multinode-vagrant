@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
+
 Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
@@ -16,7 +18,7 @@ Vagrant.configure("2") do |config|
     node1.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node1_origin_1.5.0.rc.box"
 
     node1.vm.network :private_network,
-      :ip => "192.168.156.6",
+      :ip => "192.168.166.6",
       :libvirt__netmask => "255.255.255.0",
       :libvirt__network_name => "centos_cluster_net",
       :libvirt__dhcp_enabled => false
@@ -33,7 +35,7 @@ Vagrant.configure("2") do |config|
     node2.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node2_origin_1.5.0.rc.box"
 
     node2.vm.network :private_network,
-      :ip => "192.168.156.7",
+      :ip => "192.168.166.7",
       :libvirt__netmask => "255.255.255.0",
       :libvirt__network_name => "centos_cluster_net",
       :libvirt__dhcp_enabled => false
@@ -50,7 +52,7 @@ Vagrant.configure("2") do |config|
     master.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/master_origin_1.5.0.rc.box"
 
     master.vm.network :private_network,
-      :ip => "192.168.156.5",
+      :ip => "192.168.166.5",
       :libvirt__netmask => "255.255.255.0",
       :libvirt__network_name => "centos_cluster_net",
       :libvirt__dhcp_enabled => false
