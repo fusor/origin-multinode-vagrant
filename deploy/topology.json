@@ -38,6 +38,24 @@
             "/dev/vdd"
           ]
         }
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "node3.example.com"
+              ],
+              "storage": [
+                "192.168.166.8"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            "/dev/vdb",
+            "/dev/vdc",
+            "/dev/vdd"
+          ]
+        }
       ]
     }
   ]
