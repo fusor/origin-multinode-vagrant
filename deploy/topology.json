@@ -37,7 +37,7 @@
             "/dev/vdc",
             "/dev/vdd"
           ]
-        }
+        },
         {
           "node": {
             "hostnames": {
