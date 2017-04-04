@@ -11,7 +11,7 @@
   ignore_errors: yes
 
 - name: install base packages
-  yum: state=present pkg={{ install_pkgs }}
+  yum: state=present update_cache=yes pkg={{ install_pkgs }}
   retries: 5
   delay: 1
 
@@ -20,9 +20,6 @@
 
 - name: configure dm_snapshot module
   copy: src=dm_snapshot.conf owner=root group=root mode=644 dest=/etc/modules-load.d
-
-- name: Ensure firewalld.service
-  service: name=firewalld state=started enabled=yes
 
 # Equivalent of `firewall-cmd --permanent --zone=public --add-interface=eth1`
 - firewalld: zone="{{ default_zone.stdout }}" interface=eth1 permanent=true state=enabled immediate=true
