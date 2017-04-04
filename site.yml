@@ -3,15 +3,21 @@
   become_method: sudo
   vars_files:
     - "global_vars.yml"
+  pre_tasks:
+    - name: get default_zone variable
+      shell: firewall-cmd --get-default-zone
+      register: default_zone
   roles:
     - common
 
-- hosts: master
+- hosts: masters
   become: yes
   become_method: sudo
   vars_files:
     - "global_vars.yml"
-
+  roles:
+    - masters
+  
 - hosts: nodes
   become: yes
   become_method: sudo
