@@ -1,0 +1,10 @@
+# NOTE:  This inventory file must only contain 1 master and 3 nodes in order for the snapshot'd vagrant environment to work
+
+[masters]
+master.example.com
+
+[nodes]
+node1.example.com
+node2.example.com
+node3.example.com
+
