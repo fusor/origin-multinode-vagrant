@@ -4,6 +4,9 @@
   vars_files:
     - "global_vars.yml"
   pre_tasks:
+    - name: Ensure firewalld.service
+      service: name=firewalld state=started enabled=yes
+
     - name: get default_zone variable
       shell: firewall-cmd --get-default-zone
       register: default_zone
