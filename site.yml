@@ -12,14 +12,6 @@
       register: default_zone
   roles:
     - common
-
-- hosts: masters
-  become: yes
-  become_method: sudo
-  vars_files:
-    - "global_vars.yml"
-  roles:
-    - masters
   
 - hosts: nodes
   become: yes
@@ -28,3 +20,12 @@
     - "global_vars.yml"
   roles:
     - nodes 
+
+- hosts: masters
+  become: yes
+  become_method: sudo
+  vars_files:
+    - "global_vars.yml"
+  roles:
+    - masters
+    
