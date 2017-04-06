@@ -21,33 +21,59 @@
 - name: configure dm_snapshot module
   copy: src=dm_snapshot.conf owner=root group=root mode=644 dest=/etc/modules-load.d
 
-# Equivalent of `firewall-cmd --permanent --zone=public --add-interface=eth1`
 - name: firewalld - enable eth1
   firewalld: zone="{{ default_zone.stdout }}" interface=eth1 permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-interface=eth1
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
 
-# Equivalent of `firewall-cmd --permanent --zone=public --add-interface=weave`
 - name: firewalld - enable weave
   firewalld: zone="{{ default_zone.stdout }}" interface=weave permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-interface=weave
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
 
-# Equivalent of `firewall-cmd --permanent --zone=public --add-source=172.42.42.0/24`
 - name: firewalld - enable CIDR source 172.42.42.0/24
   firewalld: source=172.42.42.0/24 zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-source=172.42.42.0/24
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
 
 # 10.32.0.0/12 is the default pod CIDR for Weave Net
 # you will need to update this if you are using a different
 # network provider, or a different CIDR for whatever reason
-# Equivalent of `firewall-cmd --permanent --zone=public --add-source=10.32.0.0/12`
 - name: firewalld - enable CIDR 10.32.0.0/12 (Weave Net)
   firewalld: source=10.32.0.0/12 zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-source=10.32.0.0/12
+  retries: 5
+  delay: 5
 
-# Equivalent of `firewall-cmd --permanent --zone=public --add-port=10250`
 - name: firewalld - Open Port 10250/tcp
   firewalld: port=10250/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=10250/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
 
-# Equivalent of `firewall-cmd --permanent --zone=public --add-port=9898`
 - name: firewalld - Open Port 6443/tcp
   firewalld: port=6443/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
-  
-# Equivalent of `firewall-cmd --permanent --zone=public --add-port=9898`
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=9898/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
 - name: firewalld - Open Port 9898/tcp
   firewalld: port=9898/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=9898/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
