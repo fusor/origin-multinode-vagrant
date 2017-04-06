@@ -1,6 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+NODES = 3 # The NODES must be three for the vagrant snapshot'd environment
+DISKS = 3
+
 ENV['VAGRANT_NO_PARALLEL'] = 'yes'
 
 Vagrant.configure("2") do |config|
@@ -10,46 +13,42 @@ Vagrant.configure("2") do |config|
   config.hostmanager.include_offline = true
   config.ssh.insert_key = false
 
+  # skip vagrant-registration
+  config.registration.skip = true
+
   config.vm.synced_folder ".", "/vagrant", :disabled => true
 
-  config.vm.define "node1" do |node1|
-    node1.vm.hostname="node1.example.com"
-    node1.vm.box = "node1_origin_1.5.0.rc"
-    node1.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node1_origin_1.5.0.rc.box"
+  # nodes
+  (1..NODES).each do |i|
+    config.vm.define "node#{i}" do |node|
+      node.vm.hostname="node#{i}.example.com"
+      node.vm.box = "node#{i}_origin_1.5.0.rc"
+      #node.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node1_origin_1.5.0.rc.box"
+      node.vm.box_url = "http://ec2-23-22-86-129.compute-1.amazonaws.com/pub/vagrant_boxes/origin_1.5.0_rc/node#{i}_origin_1.5.0.rc.box"
 
-    node1.vm.network :private_network,
-      :ip => "192.168.166.6",
-      :libvirt__netmask => "255.255.255.0",
-      :libvirt__network_name => "centos_cluster_net",
-      :libvirt__dhcp_enabled => false
-    node1.vm.provider :libvirt do |libvirt|
-      libvirt.driver = "kvm"
-      libvirt.memory = 4096
-      libvirt.cpus = 2
+      node.vm.network :private_network,
+        :ip => "192.168.166.#{5+i}",
+        :libvirt__netmask => "255.255.255.0",
+        :libvirt__network_name => "centos_cluster_net",
+        :libvirt__dhcp_enabled => false
+        (0..DISKS-1).each do |d|
+          node.vm.provider :libvirt do  |lv|
+              driverletters = ('b'..'z').to_a
+              lv.storage :file, :device => "vd#{driverletters[d]}", :path => "atomic-disk-#{i}-#{d}.disk", :size => '1024G'
+              lv.driver = "kvm"
+              lv.memory = 4096
+              lv.cpus =2
+          end
+        end
     end
   end
 
-  config.vm.define "node2" do |node2|
-    node2.vm.hostname="node2.example.com"
-    node2.vm.box = "node2_origin_1.5.0.rc"
-    node2.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node2_origin_1.5.0.rc.box"
-
-    node2.vm.network :private_network,
-      :ip => "192.168.166.7",
-      :libvirt__netmask => "255.255.255.0",
-      :libvirt__network_name => "centos_cluster_net",
-      :libvirt__dhcp_enabled => false
-    node2.vm.provider :libvirt do |libvirt|
-      libvirt.driver = "kvm"
-      libvirt.memory = 4096
-      libvirt.cpus = 2
-    end
-  end
-
+  # master node
   config.vm.define "master" do |master|
     master.vm.hostname="master.example.com"
     master.vm.box = "master_origin_1.5.0.rc"
-    master.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/master_origin_1.5.0.rc.box"
+    #master.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/master_origin_1.5.0.rc.box"
+    master.vm.box_url = "http://ec2-23-22-86-129.compute-1.amazonaws.com/pub/vagrant_boxes/origin_1.5.0_rc/master_origin_1.5.0.rc.box"
 
     master.vm.network :private_network,
       :ip => "192.168.166.5",
@@ -63,10 +62,10 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.trigger.after :up do
-    info "Cluster successfuly provisioned."
-    info "Your cluster lives at: 192.168.156.5:8443"
-    info "Default credentials are:"
-    info "admin/admin"
+  config.vm.provision :ansible do |ansible|
+      ansible.verbose = true
+      ansible.limit = "all"
+      ansible.playbook = "site.yml"
+      ansible.inventory_path = "./inventory"
   end
 end
