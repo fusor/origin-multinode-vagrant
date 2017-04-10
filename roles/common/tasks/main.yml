@@ -15,12 +15,6 @@
   retries: 5
   delay: 1
 
-#- name: save iptables
-#  command: service iptables save
-
-- name: configure dm_snapshot module
-  copy: src=dm_snapshot.conf owner=root group=root mode=644 dest=/etc/modules-load.d
-
 - name: firewalld - enable eth1
   firewalld: zone="{{ default_zone.stdout }}" interface=eth1 permanent=true state=enabled immediate=true
 #  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-interface=eth1
@@ -29,17 +23,9 @@
   retries: 5
   delay: 5
 
-- name: firewalld - enable weave
-  firewalld: zone="{{ default_zone.stdout }}" interface=weave permanent=true state=enabled immediate=true
-#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-interface=weave
-  register: task_result
-  until: task_result|success
-  retries: 5
-  delay: 5
-
-- name: firewalld - enable CIDR source 172.42.42.0/24
-  firewalld: source=172.42.42.0/24 zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
-#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-source=172.42.42.0/24
+- name: firewalld - enable CIDR source 172.30.0.0/16
+  firewalld: source=172.30.0.0/16 zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-source=172.30.0.0/16
   register: task_result
   until: task_result|success
   retries: 5
@@ -48,9 +34,9 @@
 # 10.32.0.0/12 is the default pod CIDR for Weave Net
 # you will need to update this if you are using a different
 # network provider, or a different CIDR for whatever reason
-- name: firewalld - enable CIDR 10.32.0.0/12 (Weave Net)
-  firewalld: source=10.32.0.0/12 zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
-#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-source=10.32.0.0/12
+- name: firewalld - enable CIDR 10.128.0.0/14
+  firewalld: source=10.128.0.0/14 zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-source=10.128.0.0/14
   retries: 5
   delay: 5
 
@@ -73,6 +59,54 @@
 - name: firewalld - Open Port 9898/tcp
   firewalld: port=9898/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
 #  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=9898/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Open port 24007 (GlusterFS daemon)
+  firewalld: port=24007/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=24007/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Open port 24008 (GlusterFS management)
+  firewalld: port=24008/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=24008/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Open port 2222 (GlusterFS sshd)
+  firewalld: port=2222/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=2222/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Open ports 49152-49664 (GlusterFS bricks)
+  firewalld: port=49152-49664/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=49152-49251/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Open port 8443 
+  firewalld: port=8443/tcp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=8443/tcp
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Open port 4789 
+  firewalld: port=4789/udp zone="{{ default_zone.stdout }}" permanent=true state=enabled immediate=true
+#  shell: firewall-cmd --permanent --zone="{{ default_zone.stdout }}" --add-port=4789/udp
   register: task_result
   until: task_result|success
   retries: 5
