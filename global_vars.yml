@@ -11,3 +11,22 @@ install_pkgs:
 - iptables-utils 
 - iptables-services 
 - docker
+
+oc_client_install_path: "/usr/local/bin"
+oc_cmd: "{{ oc_client_install_path }}/oc"
+oadm_cmd: "/usr/bin/oadm"
+
+openshift_service: "origin-master"
+
+cluster_user: "admin"
+cluster_user_password: "admin"
+gluster_project: "storage-project"
+
+git_checkout_dir: "/root"
+
+gluster_kubernetes_repo_url: "https://github.com/gluster/gluster-kubernetes.git"
+gluster_kubernetes_dir: "{{ git_checkout_dir }}/gluster-kubernetes"
+gk_deploy_dir: "{{ gluster_kubernetes_dir }}/deploy/"
+
+topology_file_url: "https://raw.githubusercontent.com/johnkim76/origin-multinode-vagrant/CNS/topology.json"
+topology_file: "{{ git_checkout_dir }}/topology.json"
