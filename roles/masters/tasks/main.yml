@@ -1,3 +1,72 @@
-- name: Master task place holder
-  command: echo "this_is_a_test_task"
-  register: my_test_var
+- name: Login as '{{ cluster_user }}'
+  shell: "{{ oc_cmd }} login -u {{ cluster_user }} -p {{ cluster_user_password }}"
+  register: oc_login_task
+  until: oc_login_task|success
+  retries: 5
+  delay: 5
+
+- name: Check if '{{ gluster_project }}' project already exists from a prior run
+  shell: "{{ oc_cmd }} get projects | grep {{ gluster_project }}"
+  when: oc_login_task|success
+  register: oc_get_projects
+  ignore_errors: yes
+
+- name: Create a new project '{{ gluster_project }}'
+  shell: "{{ oc_cmd }} new-project {{ gluster_project }}"
+  when: oc_get_projects|failed
+  register: create_new_project
+
+- name: Switch project to '{{ gluster_project }}'
+  shell: "{{ oc_cmd }} project {{ gluster_project }}"
+  when: create_new_project|success
+  register: switch_project
+
+- name: Enable deployment of containers in privileged mode
+  shell: "{{ oadm_cmd }} policy add-scc-to-user privileged -z default"
+  when: switch_project|success
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Enable deployment of routers in privileged mode
+  shell: "{{ oadm_cmd }} policy add-scc-to-user privileged -z router"
+  when: switch_project|success
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Grant the admin user account the cluster-admin role
+  shell: "{{ oadm_cmd }} policy add-role-to-user cluster-admin {{ cluster_user }}"
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Restart OpenShift Service
+  shell: "systemctl restart {{ openshift_service }}"
+  register: task_result
+  until: task_result|success
+  retries: 5
+  delay: 5
+
+- name: Download 'topology_file' file
+  get_url:
+    url: "{{ topology_file_url }}"
+    dest: "{{ topology_file }}"
+    mode: 0440
+  register: get_topology_file
+
+- name: Clone the gluster-kubernetes Git repo
+  git: 
+    repo: "{{ gluster_kubernetes_repo_url }}"
+    dest: "{{ gluster_kubernetes_dir }}"
+    ssh_opts: GIT_SSL_NO_VERIFY=true
+    clone: yes
+  register: clone_gluster_kubernetes_repo
+
+#- name: Run 'gk-deploy' command (this may take about 15 minutes)
+#  command: "chdir={{ gk_deploy_dir }} ./gk-deploy -g {{ topology_file }} --yes --verbose"
+#  when: (get_topology_file|success) and (clone_gluster_kubernetes_repo|success)
+#  register: gk_deploy_result
