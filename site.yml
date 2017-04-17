@@ -6,9 +6,11 @@
   pre_tasks:
     - name: Ensure firewalld.service
       service: name=firewalld state=started enabled=yes
+      register: enable_firewalld
 
     - name: get/set default_zone variable
       shell: firewall-cmd --get-default-zone
+      when: enable_firewalld|success
       register: default_zone
   roles:
     - common
