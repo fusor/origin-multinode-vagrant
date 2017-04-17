@@ -25,6 +25,7 @@ Vagrant.configure("2") do |config|
       node.vm.box = "node#{i}_origin_1.5.0.rc"
       #node.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node1_origin_1.5.0.rc.box"
       node.vm.box_url = "http://ec2-23-22-86-129.compute-1.amazonaws.com/pub/vagrant_boxes/origin_1.5.0_rc/node#{i}_origin_1.5.0.rc.box"
+      #node.vm.box_url = "/home/jkim/vagrant_boxes/node#{i}_origin.box"
 
       node.vm.network :private_network,
         :ip => "192.168.166.#{5+i}",
@@ -49,6 +50,7 @@ Vagrant.configure("2") do |config|
     master.vm.box = "master_origin_1.5.0.rc"
     #master.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/master_origin_1.5.0.rc.box"
     master.vm.box_url = "http://ec2-23-22-86-129.compute-1.amazonaws.com/pub/vagrant_boxes/origin_1.5.0_rc/master_origin_1.5.0.rc.box"
+    #master.vm.box_url = "/home/jkim/vagrant_boxes/master_centos_origin.box"
 
     master.vm.network :private_network,
       :ip => "192.168.166.5",
