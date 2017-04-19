@@ -30,4 +30,11 @@
     - "global_vars.yml"
   roles:
     - masters
-    
+
+- hosts: gluster_install
+  become: yes
+  become_method: sudo
+  vars_files:
+    - "global_vars.yml"
+  roles:
+    - gluster_install

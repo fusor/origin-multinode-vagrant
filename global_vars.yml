@@ -27,6 +27,7 @@ git_checkout_dir: "/root"
 gluster_kubernetes_repo_url: "https://github.com/gluster/gluster-kubernetes.git"
 gluster_kubernetes_dir: "{{ git_checkout_dir }}/gluster-kubernetes"
 gk_deploy_dir: "{{ gluster_kubernetes_dir }}/deploy/"
+gk_deployed_file: "{{ git_checkout_dir }}/.gk_deployed"
 
 topology_file_url: "https://raw.githubusercontent.com/johnkim76/origin-multinode-vagrant/CNS/topology.json"
 topology_file: "{{ git_checkout_dir }}/topology.json"

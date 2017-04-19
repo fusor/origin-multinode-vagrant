@@ -8,3 +8,5 @@ node1.example.com
 node2.example.com
 node3.example.com
 
+[gluster_install]
+master.example.com

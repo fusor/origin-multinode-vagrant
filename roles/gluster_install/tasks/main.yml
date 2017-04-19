@@ -1,0 +1,15 @@
+- name: Check if gk-deploy ran already
+  shell: "ls {{ gk_deployed_file }}"
+  register: check_gk_deployed_file
+  ignore_errors: yes
+
+- name: Run 'gk-deploy' command (this may take about 15 minutes)
+  command: "chdir={{ gk_deploy_dir }} ./gk-deploy -g {{ topology_file }} --yes --verbose -n {{ gluster_project }}"
+  when: (check_gk_deployed_file|failed) and (get_topology_file|success) and (clone_gluster_kubernetes_repo|success)
+  register: gk_deploy_result
+
+- name: Create gk-deployed file
+  shell: "touch {{ gk_deployed_file }}"
+  when: (check_gk_deployed_file|failed) and (gk_deploy_result|success)
+  register: create_gk_deployed_file
+  

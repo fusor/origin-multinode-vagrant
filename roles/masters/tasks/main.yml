@@ -13,6 +13,7 @@
 
 - name: Create a new project '{{ gluster_project }}'
   shell: "{{ oc_cmd }} new-project {{ gluster_project }}"
+  run_once: true
   when: oc_get_projects|failed
   register: create_new_project
 
@@ -22,7 +23,7 @@
   register: switch_project
 
 - name: Enable deployment of containers in privileged mode
-  shell: "{{ oadm_cmd }} policy add-scc-to-user privileged -z default"
+  shell: "{{ oadm_cmd }} policy add-scc-to-user privileged -z default -n {{ gluster_project }}"
   when: switch_project|success
   register: task_result
   until: task_result|success
@@ -30,7 +31,7 @@
   delay: 5
 
 - name: Enable deployment of routers in privileged mode
-  shell: "{{ oadm_cmd }} policy add-scc-to-user privileged -z router"
+  shell: "{{ oadm_cmd }} policy add-scc-to-user privileged -z router -n {{ gluster_project }}"
   when: switch_project|success
   register: task_result
   until: task_result|success
@@ -38,7 +39,7 @@
   delay: 5
 
 - name: Grant the admin user account the cluster-admin role
-  shell: "{{ oadm_cmd }} policy add-role-to-user cluster-admin {{ cluster_user }}"
+  shell: "{{ oadm_cmd }} policy add-role-to-user cluster-admin {{ cluster_user }} -n {{ gluster_project }}"
   register: task_result
   until: task_result|success
   retries: 5
@@ -56,6 +57,7 @@
     url: "{{ topology_file_url }}"
     dest: "{{ topology_file }}"
     mode: 0440
+  run_once: true
   register: get_topology_file
 
 - name: Clone the gluster-kubernetes Git repo
@@ -64,9 +66,5 @@
     dest: "{{ gluster_kubernetes_dir }}"
     ssh_opts: GIT_SSL_NO_VERIFY=true
     clone: yes
+  run_once: true
   register: clone_gluster_kubernetes_repo
-
-#- name: Run 'gk-deploy' command (this may take about 15 minutes)
-#  command: "chdir={{ gk_deploy_dir }} ./gk-deploy -g {{ topology_file }} --yes --verbose"
-#  when: (get_topology_file|success) and (clone_gluster_kubernetes_repo|success)
-#  register: gk_deploy_result
