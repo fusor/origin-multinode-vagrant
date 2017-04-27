@@ -10,7 +10,7 @@ if [ -f ${HOME}/.kube/config ]; then
 fi
 
 echo "Getting config from master"
-vagrant ssh master -c "sudo cat .kube/config" > ${HOME}/.kube/config
+vagrant ssh master -c "sudo cat /etc/origin/master/admin.kubeconfig" > ${HOME}/.kube/config
 eth1=$(vagrant ssh master -c "ip addr | grep eth0 | grep inet ")
 
 eth1=$(echo $eth1 | awk '{print $2}' | sed -e 's/\/.*$//')

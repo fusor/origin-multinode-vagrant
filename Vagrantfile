@@ -1,70 +1,53 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+require "fileutils"
+
+CONFIG_FILE = File.expand_path("config_file.rb")
+if File.exist?(CONFIG_FILE)
+  require CONFIG_FILE
+end
+
+if $vm_memory < 512
+  puts "WARNING: Your machine should have at least 512 MB of memory"
+end
 
 Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline = true
+
   config.ssh.insert_key = false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  config.vm.synced_folder ".", "/vagrant", :disabled => true
+  (1..$node_count).each do |node|
 
-  config.vm.define "node1" do |node1|
-    node1.vm.hostname="node1.example.com"
-    node1.vm.box = "node1_origin_1.5.0.rc"
-    node1.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node1_origin_1.5.0.rc.box"
+    config.vm.box = $node_box
+    config.vm.define vm_name = "kube#{node}" do |kube|
+      kube.hostmanager.aliases = "kube#{node}"
+      kube.vm.hostname = "kube#{node}"
+      kube.vm.network "private_network", ip: "#{$subnet}.1#{node}", auto_config: true
 
-    node1.vm.network :private_network,
-      :ip => "192.168.156.6",
-      :libvirt__netmask => "255.255.255.0",
-      :libvirt__network_name => "centos_cluster_net",
-      :libvirt__dhcp_enabled => false
-    node1.vm.provider :libvirt do |libvirt|
-      libvirt.driver = "kvm"
-      libvirt.memory = 4096
-      libvirt.cpus = 2
+      kube.vm.provider "libvirt" do |lv|
+        lv.driver = "kvm"
+        lv.memory = $vm_memory
+        lv.cpus = $vm_vcpus
+        lv.machine_virtual_size = $vm_disk
+      end
     end
   end
 
-  config.vm.define "node2" do |node2|
-    node2.vm.hostname="node2.example.com"
-    node2.vm.box = "node2_origin_1.5.0.rc"
-    node2.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node2_origin_1.5.0.rc.box"
+  config.vm.box = $master_box
+  config.vm.define vm_name = "master" do |kube|
+    kube.hostmanager.aliases = "master"
+    kube.vm.hostname = "master"
+    kube.vm.network "private_network", ip: "#{$subnet}.2#{$node_count}", auto_config: true
 
-    node2.vm.network :private_network,
-      :ip => "192.168.156.7",
-      :libvirt__netmask => "255.255.255.0",
-      :libvirt__network_name => "centos_cluster_net",
-      :libvirt__dhcp_enabled => false
-    node2.vm.provider :libvirt do |libvirt|
-      libvirt.driver = "kvm"
-      libvirt.memory = 4096
-      libvirt.cpus = 2
-    end
-  end
-
-  config.vm.define "master" do |master|
-    master.vm.hostname="master.example.com"
-    master.vm.box = "master_origin_1.5.0.rc"
-    master.vm.box_url = "https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/master_origin_1.5.0.rc.box"
-
-    master.vm.network :private_network,
-      :ip => "192.168.156.5",
-      :libvirt__netmask => "255.255.255.0",
-      :libvirt__network_name => "centos_cluster_net",
-      :libvirt__dhcp_enabled => false
-    master.vm.provider :libvirt do |libvirt|
-      libvirt.driver = "kvm"
-      libvirt.memory = 8192
-      libvirt.cpus = 4
-    end
-  end
-
-  config.trigger.after :up do
-    info "Cluster successfuly provisioned."
-    info "Your cluster lives at: 192.168.156.5:8443"
-    info "Default credentials are:"
-    info "admin/admin"
+    kube.vm.provider "libvirt" do |lv|
+      lv.driver = "kvm"
+      lv.memory = $vm_memory
+      lv.cpus = $vm_vcpus
+      lv.machine_virtual_size = $vm_disk
+      end
   end
 end

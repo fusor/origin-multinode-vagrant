@@ -1,0 +1,6 @@
+# Default config for the multinode cluster
+
+CLUSTER="openshift"
+
+# The first machine is the master
+VM_COUNT=3
