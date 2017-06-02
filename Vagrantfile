@@ -1,17 +1,19 @@
 # -*- mode: ruby -*-
-# vi: set ft=ruby :
-require "fileutils"
+# # vi: set ft=ruby :
 
-CONFIG_FILE = File.expand_path("config_file.rb")
-if File.exist?(CONFIG_FILE)
-  require CONFIG_FILE
-end
+# Specify minimum Vagrant version and Vagrant API version
+Vagrant.require_version ">= 1.6.0"
+VAGRANTFILE_API_VERSION = "2"
 
-if $vm_memory < 512
-  puts "WARNING: Your machine should have at least 512 MB of memory"
-end
+# Require YAML module
+require 'yaml'
 
-Vagrant.configure("2") do |config|
+# Read YAML file with box details
+servers = YAML.load_file('servers.yaml')
+
+# Create boxes
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
   config.hostmanager.ignore_private_ip = false
@@ -20,34 +22,27 @@ Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  (1..$node_count).each do |node|
+  servers.each do |servers|
+    if servers["ram"] < 512
+      puts "WARNING: Your machine should have at least 512 MB of memory"
+    end
 
-    config.vm.box = $node_box
-    config.vm.define vm_name = "kube#{node}" do |kube|
-      kube.hostmanager.aliases = "kube#{node}"
-      kube.vm.hostname = "kube#{node}"
-      kube.vm.network "private_network", ip: "#{$subnet}.1#{node}", auto_config: true
-
-      kube.vm.provider "libvirt" do |lv|
+    config.vm.define servers["name"] do |srv|
+      srv.vm.hostname= servers["name"] + ".example.com"
+      srv.hostmanager.aliases = servers["name"]
+      srv.vm.box = servers["box"]
+      srv.vm.box_url = servers["box_url"]
+      srv.vm.network :private_network,
+        :ip => servers["ip"]
+        # :libvirt__netmask => "255.255.255.0",
+        # :libvirt__network_name => "centos_cluster_net",
+        # :libvirt__dhcp_enabled => false
+      srv.vm.provider :libvirt do |lv|
         lv.driver = "kvm"
-        lv.memory = $vm_memory
-        lv.cpus = $vm_vcpus
-        lv.machine_virtual_size = $vm_disk
+        lv.memory = servers["ram"]
+        lv.cpus = servers["vcpus"]
+        lv.machine_virtual_size = servers["disk"]
       end
     end
-  end
-
-  config.vm.box = $master_box
-  config.vm.define vm_name = "master" do |kube|
-    kube.hostmanager.aliases = "master"
-    kube.vm.hostname = "master"
-    kube.vm.network "private_network", ip: "#{$subnet}.2#{$node_count}", auto_config: true
-
-    kube.vm.provider "libvirt" do |lv|
-      lv.driver = "kvm"
-      lv.memory = $vm_memory
-      lv.cpus = $vm_vcpus
-      lv.machine_virtual_size = $vm_disk
-      end
   end
 end

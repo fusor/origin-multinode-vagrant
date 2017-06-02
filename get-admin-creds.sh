@@ -23,9 +23,12 @@ fi
 echo "Getting config from ${CLUSTER} master"
 ERROR=false
 if [[ "${CLUSTER}" == "openshift" ]]; then
-    vagrant ssh master -c "sudo cat /etc/origin/master/admin.kubeconfig" > ${HOME}/.kube/config || ERROR=true
+    vagrant ssh master -c "sudo cat ~/.kube/config" > ${HOME}/.kube/config || ERROR=true
+    if $ERROR; then
+        echo "Looking for credentials in a different location"
+        vagrant ssh master -c "sudo cat /etc/origin/master/admin.kubeconfig" > ${HOME}/.kube/config || ERROR=true
+    fi
     error-check
-
 elif [[ "${CLUSTER}" == "kubernetes" ]]; then
     vagrant ssh master -c "sudo cat /etc/kubernetes/admin.conf" > ${HOME}/.kube/config || ERROR=true
     error-check
@@ -35,5 +38,6 @@ eth1=$(vagrant ssh master -c "ip addr | grep eth0 | grep inet")
 eth1=$(echo $eth1 | awk '{print $2}' | sed -e 's/\/.*$//')
 echo $eth1
 sed -i "s/localhost/$eth1/" ${HOME}/.kube/config
+sed -i 's/master\.example\.com/'"${eth1}"'/' ${HOME}/.kube/config
 
 echo "Clients should now be ready to access your ${CLUSTER} cluster"

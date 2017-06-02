@@ -3,11 +3,15 @@
 set -e
 
 PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-VAGRANT_CONFIG=$PROJECT_ROOT/config_file.rb
+VAGRANT_CONFIG=$PROJECT_ROOT/servers.yaml
 CACHE_IMAGE_PATH=$PROJECT_ROOT/cached-images
 
 source $PROJECT_ROOT/default-config
 source $PROJECT_ROOT/$CLUSTER/setup.sh
+
+declare -a CACHED_IMAGES=(
+    "$CACHE_IMAGE_PATH/1.5.0-rc"
+)
 
 NODE_BOX="centos/7"
 MASTER_BOX="centos/7"
@@ -17,50 +21,71 @@ function get-admin-creds {
     ./get-admin-creds.sh
 }
 
-function render-configfile {
-    NODE_COUNT=$((VM_COUNT-1))
-
-cat << EOF | tee ${VAGRANT_CONFIG}
-# THIS FILE IS MANAGED BY setup-cluster.sh #
-# Cluster info
-\$node_count = ${NODE_COUNT}
-\$master_count = 1
-
-\$vm_memory = 1024
-\$vm_vcpus = 1
-\$vm_disk = 45
-\$node_box = "${NODE_BOX}"
-\$master_box = "${MASTER_BOX}"
-\$subnet = "192.168.156"
-EOF
-}
-
-declare -a CACHED_IMAGES=(
-    "$CACHE_IMAGE_PATH/1.5.0-rc"
-)
-
 function check-cached-images {
-    for path in "${CACHED_IMAGES[@]}"; do
-        version=$(echo $path | rev | cut -f 1 -d '/' | rev)
-        source $path
+    for img_path in "${CACHED_IMAGES[@]}"; do
+        version=$(echo $img_path | rev | cut -f 1 -d '/' | rev)
+        source $img_path
         if [[ "${version}" == "${VERSION}" ]]; then
             echo "Found Cached Images"
-            if [[ ${USE_CACHE} ]]; then
+            if $USE_CACHE; then
                 echo "${version} -"
-                echo "  MASTER:  ${master}"
-                echo "  NODE:    ${node}"
-                NODE_BOX=$node
-                MASTER_BOX=$master
+                cat $img_path
                 CACHE_FOUND=true
                 break
             fi
+            echo "USE_CACHE is set to ${USE_CACHE}"
         fi
     done
 }
 
+function create-header {
+cat << EOF | tee ${VAGRANT_CONFIG}
+# servers.yaml
+#
+# THIS FILE IS MANAGED BY setup-cluster.sh #
+---
+EOF
+}
+
+function create-master-server {
+if $CACHE_FOUND; then
+    MASTER_BOX=$(cat $img_path | grep "master=" | cut -f 2 -d '=')
+fi
+
+cat << EOF | tee -a ${VAGRANT_CONFIG}
+- name: master
+  box: master-$version
+  box_url: $MASTER_BOX
+  ram: 1024
+  vcpus: 1
+  disk: 45
+  ip: 192.168.156.2
+EOF
+}
+
+function create-node-servers {
+if $CACHE_FOUND; then
+    NODE_BOX=$(cat $img_path | grep "node${1}=" | cut -f 2 -d '=')
+fi
+
+cat << EOF | tee -a ${VAGRANT_CONFIG}
+- name: kube$1
+  box: node$1-$version
+  box_url: $NODE_BOX
+  ram: 1024
+  vcpus: 1
+  disk: 45
+  ip: 192.168.156.1$1
+EOF
+}
+
 check-cached-images
-render-configfile
-vagrant up --no-parallel
+create-header
+for n in $(seq $NODE_COUNT); do
+    create-node-servers $n
+done
+create-master-server
+#vagrant up --no-parallel
 if [[ !$CACHE_FOUND ]]; then
     prepare-env
     start-cluster
