@@ -1,0 +1,2 @@
+node="https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/node1_origin_1.5.0.rc.box"
+master="https://s3.amazonaws.com/fusor-vagrant/origin_1.5.0_rc/master_origin_1.5.0.rc.box"

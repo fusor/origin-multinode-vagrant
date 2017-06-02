@@ -4,3 +4,9 @@ CLUSTER="openshift"
 
 # The first machine is the master
 VM_COUNT=3
+
+# If there already exists a vagrant box with $VERSION and $USE_CACHE
+# is true, use the cached vagrant box to setup the cluster.
+#
+# VERSION="1.5.0-rc"
+# USE_CACHE=true

@@ -4,9 +4,14 @@ set -e
 
 PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 VAGRANT_CONFIG=$PROJECT_ROOT/config_file.rb
+CACHE_IMAGE_PATH=$PROJECT_ROOT/cached-images
 
 source $PROJECT_ROOT/default-config
 source $PROJECT_ROOT/$CLUSTER/setup.sh
+
+NODE_BOX="centos/7"
+MASTER_BOX="centos/7"
+CACHE_FOUND=false
 
 function get-admin-creds {
     ./get-admin-creds.sh
@@ -24,14 +29,40 @@ cat << EOF | tee ${VAGRANT_CONFIG}
 \$vm_memory = 1024
 \$vm_vcpus = 1
 \$vm_disk = 45
-\$node_box = "centos/7"
-\$master_box = "centos/7"
+\$node_box = "${NODE_BOX}"
+\$master_box = "${MASTER_BOX}"
 \$subnet = "192.168.156"
 EOF
 }
 
+declare -a CACHED_IMAGES=(
+    "$CACHE_IMAGE_PATH/1.5.0-rc"
+)
+
+function check-cached-images {
+    for path in "${CACHED_IMAGES[@]}"; do
+        version=$(echo $path | rev | cut -f 1 -d '/' | rev)
+        source $path
+        if [[ "${version}" == "${VERSION}" ]]; then
+            echo "Found Cached Images"
+            if [[ ${USE_CACHE} ]]; then
+                echo "${version} -"
+                echo "  MASTER:  ${master}"
+                echo "  NODE:    ${node}"
+                NODE_BOX=$node
+                MASTER_BOX=$master
+                CACHE_FOUND=true
+                break
+            fi
+        fi
+    done
+}
+
+check-cached-images
 render-configfile
 vagrant up --no-parallel
-prepare-env
-start-cluster
-get-admin-creds
+if [[ !$CACHE_FOUND ]]; then
+    prepare-env
+    start-cluster
+    get-admin-creds
+fi
