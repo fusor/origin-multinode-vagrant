@@ -1,0 +1,25 @@
+# servers.yaml
+#
+# THIS FILE IS MANAGED BY setup-cluster.sh #
+---
+- name: kube1
+  box: node1-1.5.0-rc
+  box_url: centos/7
+  ram: 1024
+  vcpus: 1
+  disk: 45
+  ip: 192.168.156.11
+- name: kube2
+  box: node2-1.5.0-rc
+  box_url: centos/7
+  ram: 1024
+  vcpus: 1
+  disk: 45
+  ip: 192.168.156.12
+- name: master
+  box: master-1.5.0-rc
+  box_url: centos/7
+  ram: 1024
+  vcpus: 1
+  disk: 45
+  ip: 192.168.156.2
