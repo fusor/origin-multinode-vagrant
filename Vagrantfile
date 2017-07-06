@@ -41,7 +41,7 @@ Vagrant.configure("2") do |config|
   config.vm.define vm_name = "master" do |kube|
     kube.hostmanager.aliases = "master"
     kube.vm.hostname = "master"
-    kube.vm.network "private_network", ip: "#{$subnet}.2#{$node_count}", auto_config: true
+    kube.vm.network "private_network", ip: "#{$subnet}.5", auto_config: true
 
     kube.vm.provider "libvirt" do |lv|
       lv.driver = "kvm"

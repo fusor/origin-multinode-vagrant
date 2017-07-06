@@ -8,5 +8,5 @@ VM_COUNT=3
 # If there already exists a vagrant box with $VERSION and $USE_CACHE
 # is true, use the cached vagrant box to setup the cluster.
 #
-# VERSION="1.5.0-rc"
+VERSION="3.6.0-alpha.2"
 # USE_CACHE=true
