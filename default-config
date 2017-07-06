@@ -1,0 +1,12 @@
+# Default config for the multinode cluster
+
+CLUSTER="openshift"
+
+# The first machine is the master
+VM_COUNT=3
+
+# If there already exists a vagrant box with $VERSION and $USE_CACHE
+# is true, use the cached vagrant box to setup the cluster.
+#
+VERSION="3.6.0-alpha.2"
+# USE_CACHE=true
